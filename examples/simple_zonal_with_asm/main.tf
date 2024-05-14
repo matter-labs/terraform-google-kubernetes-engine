@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-locals {
-  cluster_type = "simple-zonal-asm"
-}
-
 data "google_client_config" "default" {}
 
 provider "kubernetes" {
@@ -31,7 +27,9 @@ data "google_project" "project" {
 }
 
 module "gke" {
-  source                  = "../../"
+  source  = "terraform-google-modules/kubernetes-engine/google"
+  version = "~> 30.0"
+
   project_id              = var.project_id
   name                    = "test-prefix-cluster-test-suffix"
   regional                = false
@@ -45,19 +43,22 @@ module "gke" {
   network_policy          = false
   cluster_resource_labels = { "mesh_id" : "proj-${data.google_project.project.number}" }
   identity_namespace      = "${var.project_id}.svc.id.goog"
+  deletion_protection     = false
   node_pools = [
     {
       name         = "asm-node-pool"
       autoscaling  = false
       auto_upgrade = true
       node_count   = 3
-      machine_type = "e2-standard-4"
+      machine_type = "e2-standard-8"
     },
   ]
 }
 
 module "asm" {
-  source                    = "../../modules/asm"
+  source  = "terraform-google-modules/kubernetes-engine/google//modules/asm"
+  version = "~> 30.0"
+
   project_id                = var.project_id
   cluster_name              = module.gke.name
   cluster_location          = module.gke.location
@@ -65,4 +66,5 @@ module "asm" {
   enable_cni                = true
   enable_fleet_registration = true
   enable_mesh_feature       = true
+
 }

@@ -19,16 +19,9 @@ locals {
   bastion_zone = format("%s-a", var.region)
 }
 
-data "template_file" "startup_script" {
-  template = <<-EOF
-  sudo apt-get update -y
-  sudo apt-get install -y tinyproxy
-  EOF
-}
-
 module "bastion" {
   source  = "terraform-google-modules/bastion-host/google"
-  version = "~> 5.0"
+  version = "~> 6.0"
 
   network        = module.vpc.network_self_link
   subnet         = module.vpc.subnets_self_links[0]
@@ -38,7 +31,7 @@ module "bastion" {
   zone           = local.bastion_zone
   image_project  = "debian-cloud"
   machine_type   = "g1-small"
-  startup_script = data.template_file.startup_script.rendered
+  startup_script = templatefile("${path.module}/templates/startup-script.tftpl", {})
   members        = var.bastion_members
   shielded_vm    = "false"
 }

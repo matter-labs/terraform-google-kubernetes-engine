@@ -26,7 +26,7 @@
  *****************************************/
 resource "google_compute_firewall" "intra_egress" {
   count       = var.add_cluster_firewall_rules ? 1 : 0
-  name        = "gke-${substr(var.name, 0, min(25, length(var.name)))}-intra-cluster-egress"
+  name        = "gke-${substr(var.name, 0, min(36, length(var.name)))}-intra-cluster-egress"
   description = "Managed by terraform gke module: Allow pods to communicate with each other and the master"
   project     = local.network_project_id
   network     = var.network
@@ -56,6 +56,41 @@ resource "google_compute_firewall" "intra_egress" {
 
 
 /******************************************
+  Allow egress to the TPU IPv4 CIDR block
+
+  This rule is defined separately from the
+  intra_egress rule above since it requires
+  an output from the google_container_cluster
+  resource.
+
+  https://github.com/terraform-google-modules/terraform-google-kubernetes-engine/issues/1124
+ *****************************************/
+resource "google_compute_firewall" "tpu_egress" {
+  count       = var.add_cluster_firewall_rules && var.enable_tpu ? 1 : 0
+  name        = "gke-${substr(var.name, 0, min(36, length(var.name)))}-tpu-egress"
+  description = "Managed by terraform gke module: Allow pods to communicate with TPUs"
+  project     = local.network_project_id
+  network     = var.network
+  priority    = var.firewall_priority
+  direction   = "EGRESS"
+
+  target_tags        = [local.cluster_network_tag]
+  destination_ranges = [google_container_cluster.primary.tpu_ipv4_cidr_block]
+
+  # Allow all possible protocols
+  allow { protocol = "tcp" }
+  allow { protocol = "udp" }
+  allow { protocol = "icmp" }
+  allow { protocol = "sctp" }
+  allow { protocol = "esp" }
+  allow { protocol = "ah" }
+
+  depends_on = [
+    google_container_cluster.primary,
+  ]
+}
+
+/******************************************
   Allow GKE master to hit non 443 ports for
   Webhooks/Admission Controllers
 
@@ -63,7 +98,7 @@ resource "google_compute_firewall" "intra_egress" {
  *****************************************/
 resource "google_compute_firewall" "master_webhooks" {
   count       = var.add_cluster_firewall_rules || var.add_master_webhook_firewall_rules ? 1 : 0
-  name        = "gke-${substr(var.name, 0, min(25, length(var.name)))}-webhooks"
+  name        = "gke-${substr(var.name, 0, min(36, length(var.name)))}-webhooks"
   description = "Managed by terraform gke module: Allow master to hit pods for admission controllers/webhooks"
   project     = local.network_project_id
   network     = var.network
@@ -93,7 +128,7 @@ resource "google_compute_firewall" "master_webhooks" {
 resource "google_compute_firewall" "shadow_allow_pods" {
   count = var.add_shadow_firewall_rules ? 1 : 0
 
-  name        = "gke-shadow-${substr(var.name, 0, min(25, length(var.name)))}-all"
+  name        = "gke-shadow-${substr(var.name, 0, min(36, length(var.name)))}-all"
   description = "Managed by terraform gke module: A shadow firewall rule to match the default rule allowing pod communication."
   project     = local.network_project_id
   network     = var.network
@@ -122,7 +157,7 @@ resource "google_compute_firewall" "shadow_allow_pods" {
 resource "google_compute_firewall" "shadow_allow_master" {
   count = var.add_shadow_firewall_rules ? 1 : 0
 
-  name        = "gke-shadow-${substr(var.name, 0, min(25, length(var.name)))}-master"
+  name        = "gke-shadow-${substr(var.name, 0, min(36, length(var.name)))}-master"
   description = "Managed by terraform GKE module: A shadow firewall rule to match the default rule allowing worker nodes communication."
   project     = local.network_project_id
   network     = var.network
@@ -148,7 +183,7 @@ resource "google_compute_firewall" "shadow_allow_master" {
 resource "google_compute_firewall" "shadow_allow_nodes" {
   count = var.add_shadow_firewall_rules ? 1 : 0
 
-  name        = "gke-shadow-${substr(var.name, 0, min(25, length(var.name)))}-vms"
+  name        = "gke-shadow-${substr(var.name, 0, min(36, length(var.name)))}-vms"
   description = "Managed by Terraform GKE module: A shadow firewall rule to match the default rule allowing worker nodes communication."
   project     = local.network_project_id
   network     = var.network
@@ -183,7 +218,7 @@ resource "google_compute_firewall" "shadow_allow_nodes" {
 resource "google_compute_firewall" "shadow_allow_inkubelet" {
   count = var.add_shadow_firewall_rules ? 1 : 0
 
-  name        = "gke-shadow-${substr(var.name, 0, min(25, length(var.name)))}-inkubelet"
+  name        = "gke-shadow-${substr(var.name, 0, min(36, length(var.name)))}-inkubelet"
   description = "Managed by terraform GKE module: A shadow firewall rule to match the default rule allowing worker nodes & pods communication to kubelet."
   project     = local.network_project_id
   network     = var.network
@@ -210,7 +245,7 @@ resource "google_compute_firewall" "shadow_allow_inkubelet" {
 resource "google_compute_firewall" "shadow_deny_exkubelet" {
   count = var.add_shadow_firewall_rules ? 1 : 0
 
-  name        = "gke-shadow-${substr(var.name, 0, min(25, length(var.name)))}-exkubelet"
+  name        = "gke-shadow-${substr(var.name, 0, min(36, length(var.name)))}-exkubelet"
   description = "Managed by terraform GKE module: A shadow firewall rule to match the default deny rule to kubelet."
   project     = local.network_project_id
   network     = var.network

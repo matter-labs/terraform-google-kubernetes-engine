@@ -17,8 +17,17 @@
 
 terraform {
   required_version = ">= 0.13.0"
-
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = "< 6"
+    }
+    google-beta = {
+      source  = "hashicorp/google-beta"
+      version = "< 6"
+    }
+  }
   provider_meta "google" {
-    module_name = "blueprints/terraform/terraform-google-kubernetes-engine:binary-authorization/v25.0.0"
+    module_name = "blueprints/terraform/terraform-google-kubernetes-engine:binary-authorization/v30.3.0"
   }
 }

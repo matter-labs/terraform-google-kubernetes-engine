@@ -107,3 +107,33 @@ variable "module_depends_on" {
   type        = list(any)
   default     = []
 }
+
+variable "additional_projects" {
+  description = "A list of roles to be added to the created service account for additional projects"
+  type        = map(list(string))
+  default     = {}
+}
+
+variable "gcp_sa_display_name" {
+  description = "The Google service account display name; if null, a default string will be used"
+  type        = string
+  nullable    = true
+  default     = null
+
+  validation {
+    condition     = var.gcp_sa_display_name == null ? true : length(var.gcp_sa_display_name) <= 100
+    error_message = "The Google service account display name must be at most 100 characters"
+  }
+}
+
+variable "gcp_sa_description" {
+  description = "The Service Google service account desciption; if null, will be left out"
+  type        = string
+  nullable    = true
+  default     = null
+
+  validation {
+    condition     = var.gcp_sa_description == null ? true : length(var.gcp_sa_description) <= 256
+    error_message = "The Google service account description must be at most 256 characters"
+  }
+}

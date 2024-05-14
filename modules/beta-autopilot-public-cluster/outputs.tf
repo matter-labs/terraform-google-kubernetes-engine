@@ -142,6 +142,13 @@ output "identity_namespace" {
   ]
 }
 
+output "tpu_ipv4_cidr_block" {
+  description = "The IP range in CIDR notation used for the TPUs"
+  value       = var.enable_tpu ? google_container_cluster.primary.tpu_ipv4_cidr_block : null
+}
+
+
+
 output "cloudrun_enabled" {
   description = "Whether CloudRun enabled"
   value       = false
@@ -172,7 +179,7 @@ output "identity_service_enabled" {
   value       = local.cluster_pod_security_policy_enabled
 }
 
-output "tpu_ipv4_cidr_block" {
-  description = "The IP range in CIDR notation used for the TPUs"
-  value       = var.enable_tpu ? google_container_cluster.primary.tpu_ipv4_cidr_block : null
+output "fleet_membership" {
+  description = "Fleet membership (if registered)"
+  value       = local.fleet_membership
 }

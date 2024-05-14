@@ -19,14 +19,16 @@
 // The safer-cluster module is based on a private cluster, with a several
 // settings set to recommended values by default.
 module "gke" {
-  source             = "../beta-private-cluster/"
-  project_id         = var.project_id
-  name               = var.name
-  regional           = var.regional
-  region             = var.region
-  zones              = var.zones
-  network            = var.network
-  network_project_id = var.network_project_id
+  source              = "../beta-private-cluster/"
+  project_id          = var.project_id
+  name                = var.name
+  description         = var.description
+  regional            = var.regional
+  region              = var.region
+  zones               = var.zones
+  network             = var.network
+  network_project_id  = var.network_project_id
+  deletion_protection = var.deletion_protection
 
   // We need to enforce a minimum Kubernetes Version to ensure
   // that the necessary security features are enabled.
@@ -102,6 +104,7 @@ module "gke" {
   monitoring_service = var.monitoring_service
 
   monitoring_enable_managed_prometheus = var.monitoring_enable_managed_prometheus
+  monitoring_enabled_components        = var.monitoring_enabled_components
 
   // We never use the default service account for the cluster. The default
   // project/editor permissions can create problems if nodes were to be ever
@@ -180,14 +183,27 @@ module "gke" {
   // We enable Workload Identity by default.
   identity_namespace = "${var.project_id}.svc.id.goog"
 
+  // Enabling mesh certificates requires Workload Identity
+  enable_mesh_certificates = var.enable_mesh_certificates
+
   authenticator_security_group = var.authenticator_security_group
 
   enable_shielded_nodes = var.enable_shielded_nodes
-
-  skip_provisioners = var.skip_provisioners
 
   gce_pd_csi_driver    = var.gce_pd_csi_driver
   filestore_csi_driver = var.filestore_csi_driver
 
   notification_config_topic = var.notification_config_topic
+
+  timeouts = var.timeouts
+
+  enable_gcfs = var.enable_gcfs
+
+  // Enabling vulnerability and audit for workloads
+  workload_vulnerability_mode = var.workload_vulnerability_mode
+  workload_config_audit_mode  = var.workload_config_audit_mode
+
+  // Enabling security posture
+  security_posture_mode               = var.security_posture_mode
+  security_posture_vulnerability_mode = var.security_posture_vulnerability_mode
 }

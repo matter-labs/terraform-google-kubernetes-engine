@@ -27,7 +27,9 @@ provider "kubernetes" {
 }
 
 module "gke" {
-  source     = "../../modules/beta-public-cluster/"
+  source  = "terraform-google-modules/kubernetes-engine/google//modules/beta-public-cluster"
+  version = "~> 30.0"
+
   project_id = var.project_id
   regional   = false
   region     = var.region
@@ -43,6 +45,7 @@ module "gke" {
   remove_default_node_pool = true
   service_account          = "create"
   release_channel          = "REGULAR"
+  deletion_protection      = false
 
   node_pools = [
     {

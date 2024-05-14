@@ -27,7 +27,9 @@ provider "kubernetes" {
 }
 
 module "gke" {
-  source                   = "../../"
+  source  = "terraform-google-modules/kubernetes-engine/google"
+  version = "~> 30.0"
+
   project_id               = var.project_id
   name                     = "${local.cluster_type}-cluster${var.cluster_name_suffix}"
   region                   = var.region
@@ -38,8 +40,7 @@ module "gke" {
   remove_default_node_pool = true
   service_account          = "create"
   node_metadata            = "GKE_METADATA"
-  # https://github.com/terraform-google-modules/terraform-google-kubernetes-engine/issues/1313
-  kubernetes_version = "1.23"
+  deletion_protection      = false
   node_pools = [
     {
       name         = "wi-pool"
@@ -52,7 +53,9 @@ module "gke" {
 
 # example without existing KSA
 module "workload_identity" {
-  source              = "../../modules/workload-identity"
+  source  = "terraform-google-modules/kubernetes-engine/google//modules/workload-identity"
+  version = "~> 30.0"
+
   project_id          = var.project_id
   name                = "iden-${module.gke.name}"
   namespace           = "default"
@@ -70,14 +73,16 @@ resource "kubernetes_service_account" "test" {
 }
 
 module "workload_identity_existing_ksa" {
-  source              = "../../modules/workload-identity"
+  source  = "terraform-google-modules/kubernetes-engine/google//modules/workload-identity"
+  version = "~> 30.0"
+
   project_id          = var.project_id
   name                = "existing-${module.gke.name}"
   cluster_name        = module.gke.name
   location            = module.gke.location
   namespace           = "default"
   use_existing_k8s_sa = true
-  k8s_sa_name         = kubernetes_service_account.test.metadata.0.name
+  k8s_sa_name         = kubernetes_service_account.test.metadata[0].name
 }
 
 # example with existing GSA
@@ -87,7 +92,9 @@ resource "google_service_account" "custom" {
 }
 
 module "workload_identity_existing_gsa" {
-  source              = "../../modules/workload-identity"
+  source  = "terraform-google-modules/kubernetes-engine/google//modules/workload-identity"
+  version = "~> 30.0"
+
   project_id          = var.project_id
   name                = google_service_account.custom.account_id
   use_existing_gcp_sa = true

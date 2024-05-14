@@ -1,47 +1,4 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:base",
-    ":semanticCommits",
-    ":preserveSemverRanges",
-    ":rebaseStalePrs"
-  ],
-  "stabilityDays":7,
-  "ignorePaths": [],
-  "labels": ["dependencies"],
-    "vulnerabilityAlerts":{
-     "labels":[
-       "type:security"
-     ],
-     "stabilityDays":0
-  },
-  "separateMajorMinor":false,
-  "packageRules": [
-    {
-      "matchPaths": ["examples/**", "test/**", ".github/**"],
-      "extends": [":semanticCommitTypeAll(chore)"]
-    },
-    {
-      "matchPaths": ["*", "modules/**"],
-      "extends": [":semanticCommitTypeAll(fix)"]
-    },
-    {
-      "matchDepTypes": ["module"],
-      "groupName": "TF modules"
-    },
-    {
-      "matchDepTypes": ["require"],
-      "groupName": "GO modules",
-      "postUpdateOptions": ["gomodTidy"]
-    },
-    {
-      "matchPackageNames": ["go"],
-      "allowedVersions": "<1.19.0",
-      "postUpdateOptions": ["gomodTidy"]
-    },
-    {
-      "matchPackageNames": ["google", "google-beta"],
-      "groupName": "terraform googles"
-    }
-  ]
+  "extends": ["github>GoogleCloudPlatform/cloud-foundation-toolkit//infra/terraform/test-org/github/resources/renovate"]
 }

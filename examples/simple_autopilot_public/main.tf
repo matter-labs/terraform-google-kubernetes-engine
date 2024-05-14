@@ -33,7 +33,9 @@ provider "kubernetes" {
 }
 
 module "gke" {
-  source                          = "../../modules/beta-autopilot-public-cluster/"
+  source  = "terraform-google-modules/kubernetes-engine/google//modules/beta-autopilot-public-cluster"
+  version = "~> 30.0"
+
   project_id                      = var.project_id
   name                            = "${local.cluster_type}-cluster"
   regional                        = true
@@ -45,4 +47,5 @@ module "gke" {
   release_channel                 = "REGULAR"
   enable_vertical_pod_autoscaling = true
   network_tags                    = [local.cluster_type]
+  deletion_protection             = false
 }
